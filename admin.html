@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - Pendataan WA Mazeeda</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Outfit', 'sans-serif'], },
+                    colors: {
+                        primary: {
+                            50: '#f8fafc', 100: '#f1f5f9', 200: '#e2e8f0',
+                            300: '#cbd5e1', 400: '#94a3b8', 500: '#64748b',
+                            600: '#475569', 700: '#334155', 800: '#1e293b', 900: '#0f172a',
+                        },
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { background-color: #f8fafc; }
+        .slide-in { animation: slideInX 0.3s ease-out forwards; }
+        @keyframes slideInX { from { opacity: 0; transform: translateX(20px); } to { opacity: 1; transform: translateX(0); } }
+        /* Loader */
+        .spinner { border: 3px solid #f3f3f3; border-top: 3px solid #475569; border-radius: 50%; width: 20px; height: 20px; animation: spin 1s linear infinite; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    </style>
+</head>
+<body class="text-slate-800 antialiased min-h-screen">
+    
+    <div id="toast-container" class="fixed top-4 right-4 z-50 flex flex-col gap-2 pointer-events-none"></div>
+
+    <!-- Login View -->
+    <div id="login-view" class="fixed inset-0 z-40 bg-slate-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-3xl p-8 max-w-sm w-full shadow-xl shadow-slate-200/50 border border-slate-100">
+            <div class="w-16 h-16 mx-auto rounded-2xl flex items-center justify-center shadow-lg shadow-primary-500/30 mb-6 group transition-all hover:rotate-3 overflow-hidden bg-white border border-slate-100">
+                 <img src="logo.jpg" alt="Logo" class="w-full h-full object-cover" onerror="this.src='https://ui-avatars.com/api/?name=Admin&background=8b5cf6&color=fff&size=200&rounded=false';">
+            </div>
+            <h2 class="text-2xl font-bold text-center text-slate-800 mb-2">Admin Login</h2>
+            <p class="text-sm text-center text-slate-500 mb-6">Silakan masuk untuk mengelola data</p>
+            
+            <form id="login-form" class="space-y-4">
+                <div>
+                    <label class="block text-sm font-semibold text-slate-700 mb-1">Email</label>
+                    <input type="email" id="login-email" required class="w-full bg-slate-50 border border-slate-200 rounded-xl py-3 px-4 outline-none focus:ring-2 focus:ring-primary-500 transition-all">
+                </div>
+                <div>
+                    <label class="block text-sm font-semibold text-slate-700 mb-1">Password</label>
+                    <input type="password" id="login-password" required class="w-full bg-slate-50 border border-slate-200 rounded-xl py-3 px-4 outline-none focus:ring-2 focus:ring-primary-500 transition-all">
+                </div>
+                <button type="submit" id="btn-login" class="w-full bg-slate-800 hover:bg-slate-900 text-white font-semibold rounded-xl py-3 shadow-md outline-none transition-all active:scale-[0.98] mt-2">
+                    Masuk ke Dashboard
+                </button>
+            </form>
+            <div class="mt-4 text-center">
+                <a href="index.html" class="text-sm text-slate-400 hover:text-slate-600 underline">Kembali ke Halaman Utama</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Dashboard View -->
+    <div id="dashboard-view" class="hidden min-h-screen flex flex-col">
+        <!-- Header -->
+        <header class="bg-white border-b border-slate-200 sticky top-0 z-30 shadow-sm">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <div class="w-8 h-8 sm:w-10 sm:h-10 rounded-xl flex items-center justify-center overflow-hidden border border-slate-200">
+                         <img src="logo.jpg" alt="Logo" class="w-full h-full object-cover" onerror="this.src='https://ui-avatars.com/api/?name=Admin&background=8b5cf6&color=fff&size=100&rounded=false';">
+                    </div>
+                    <h1 class="font-bold text-slate-800 sm:text-lg tracking-tight hidden sm:block">Admin Mazeeda</h1>
+                </div>
+                <div class="flex items-center gap-4">
+                    <a href="index.html" class="text-xs sm:text-sm font-medium text-slate-500 hover:text-primary-600 flex items-center gap-1">
+                        Halaman Input
+                    </a>
+                    <div class="h-4 w-px bg-slate-200"></div>
+                    <button id="btn-logout" class="text-sm font-medium text-red-500 hover:text-red-700 flex items-center gap-1 active:scale-95 transition-transform">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>
+                        <span class="hidden sm:inline">Logout</span>
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <main class="flex-1 max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-8 flex flex-col gap-6">
+            
+            <!-- Controls Row -->
+            <div class="flex flex-col md:flex-row justify-between gap-4 items-center bg-white p-4 rounded-2xl shadow-sm border border-slate-100">
+                
+                <div class="flex flex-wrap gap-3 w-full md:w-auto items-center">
+                    <div class="relative min-w-[140px]">
+                        <select id="filter-class" class="appearance-none w-full bg-slate-50 border border-slate-200 text-slate-700 rounded-lg py-2 pl-3 pr-8 text-sm outline-none focus:ring-2 focus:ring-primary-500 cursor-pointer font-medium">
+                            <option value="">Semua Kelas</option>
+                        </select>
+                        <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-slate-400">
+                            <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                        </div>
+                    </div>
+                    
+                    <div class="relative min-w-[140px]">
+                        <select id="filter-status" class="appearance-none w-full bg-slate-50 border border-slate-200 text-slate-700 rounded-lg py-2 pl-3 pr-8 text-sm outline-none focus:ring-2 focus:ring-primary-500 cursor-pointer font-medium">
+                            <option value="">Semua Status</option>
+                            <option value="filled">Sudah Mengisi</option>
+                            <option value="unfilled">Belum Mengisi</option>
+                        </select>
+                        <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-slate-400">
+                            <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex gap-2 w-full md:w-auto justify-end">
+                    <button id="btn-copy-unfilled" class="flex-1 md:flex-none uppercase text-xs font-bold bg-slate-800 hover:bg-slate-900 text-white rounded-lg py-2 px-4 shadow-sm transition-all active:scale-95 flex items-center justify-center gap-1.5 whitespace-nowrap">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
+                        Copy Belum Isi
+                    </button>
+                    <!-- Trigger file upload -->
+                    <label for="csv-upload" class="flex-1 md:flex-none uppercase text-xs font-bold bg-primary-100 hover:bg-primary-200 text-primary-700 rounded-lg py-2 px-4 transition-all cursor-pointer flex items-center justify-center gap-1.5 whitespace-nowrap active:scale-95 text-center">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>
+                        Upload CSV
+                    </label>
+                    <input type="file" id="csv-upload" accept=".csv" class="hidden">
+                </div>
+            </div>
+
+            <!-- Table Card -->
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden flex-1 flex flex-col min-h-[400px]">
+                
+                <!-- Table Header -->
+                <div class="px-6 py-4 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
+                    <h2 class="font-bold text-slate-800">Data Siswi</h2>
+                    <span id="data-count-text" class="text-xs font-semibold text-slate-500 bg-slate-200 px-2 py-1 rounded-md">Total: 0</span>
+                </div>
+
+                <!-- Table Content -->
+                <div class="overflow-x-auto flex-1 relative">
+                    
+                    <div id="table-loading" class="absolute inset-0 bg-white/80 backdrop-blur-sm flex flex-col items-center justify-center z-10 hidden">
+                        <div class="spinner mb-2 border-slate-200 border-t-primary-500"></div>
+                        <p class="text-sm font-medium text-slate-500">Memuat data...</p>
+                    </div>
+
+                    <table class="w-full text-left border-collapse whitespace-nowrap">
+                        <thead>
+                            <tr class="bg-slate-50 text-slate-500 text-xs uppercase tracking-wider">
+                                <th class="px-6 py-3 font-semibold w-12">No</th>
+                                <th class="px-6 py-3 font-semibold">Nama</th>
+                                <th class="px-6 py-3 font-semibold">Kelas</th>
+                                <th class="px-6 py-3 font-semibold">Nomor WhatsApp</th>
+                                <th class="px-6 py-3 font-semibold">Nomor Tambahan</th>
+                                <th class="px-6 py-3 font-semibold">Status / Tanggal Submit</th>
+                                <th class="px-6 py-3 font-semibold text-right">Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody id="table-body" class="divide-y divide-slate-100 text-sm">
+                            <!-- Populated by JS -->
+                        </tbody>
+                    </table>
+                    
+                    <!-- Empty State -->
+                    <div id="table-empty" class="hidden absolute inset-0 flex flex-col items-center justify-center p-8 text-slate-400">
+                        <svg class="w-12 h-12 mb-3 text-slate-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 002-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>
+                        <p class="font-medium text-slate-500 text-center">Tidak ada data ditemukan</p>
+                    </div>
+
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+    <!-- Edit Form Modal Overlay -->
+    <div id="edit-modal" class="fixed inset-0 z-50 hidden flex items-end sm:items-center justify-center p-4 sm:p-0">
+        <!-- Backdrop -->
+        <div id="edit-modal-backdrop" class="absolute inset-0 bg-slate-900/40 backdrop-blur-sm transition-opacity opacity-0"></div>
+        
+        <!-- Modal Content -->
+        <div id="edit-modal-content" class="bg-white w-full max-w-md rounded-3xl p-6 relative z-10 shadow-2xl transform translate-y-8 sm:translate-y-4 opacity-0 transition-all duration-300">
+            <button id="close-edit-modal" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600 bg-slate-100 hover:bg-slate-200 p-2 rounded-full transition-colors">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+            </button>
+            
+            <h3 class="text-xl font-bold text-slate-800 mb-1">Edit Data WhatsApp</h3>
+            <p class="text-sm text-slate-500 mb-6">Wali Santri <span id="edit-student-name" class="font-semibold text-primary-600">Nama Siswi</span></p>
+
+            <form id="edit-wa-form" class="space-y-4">
+                <!-- We need the original WA record ID to update it -->
+                <input type="hidden" id="edit-wa-id">
+                <input type="hidden" id="edit-student-nama">
+                <input type="hidden" id="edit-student-kelas">
+
+                <div>
+                    <label for="edit-wa-number" class="block text-sm font-semibold text-slate-700 mb-1.5">Nomor WhatsApp <span class="text-red-500">*</span></label>
+                    <div class="relative">
+                        <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400 font-medium">+62</span>
+                        <input type="tel" id="edit-wa-number" required minlength="9" class="w-full bg-slate-50 border border-slate-200 text-slate-800 rounded-xl py-3 pl-12 pr-4 outline-none focus:ring-2 focus:ring-primary-500 focus:bg-white transition-all">
+                    </div>
+                </div>
+
+                <div>
+                    <label for="edit-wa-number-alt" class="block text-sm font-semibold text-slate-700 mb-1.5">Nomor Tambahan <span class="text-slate-400 font-normal">(Opsional)</span></label>
+                    <div class="relative">
+                        <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400 font-medium">+62</span>
+                        <input type="tel" id="edit-wa-number-alt" class="w-full bg-slate-50 border border-slate-200 text-slate-800 rounded-xl py-3 pl-12 pr-4 outline-none focus:ring-2 focus:ring-primary-500 focus:bg-white transition-all">
+                    </div>
+                </div>
+
+                <div class="pt-4 flex gap-3">
+                    <button type="submit" id="btn-save-edit" class="flex-1 bg-primary-600 hover:bg-primary-700 text-white font-semibold rounded-xl py-3 shadow-md transition-all active:scale-[0.98] flex justify-center items-center gap-2">
+                        Simpan
+                    </button>
+                    <!-- Delete button in extreme cases, though maybe better as a standalone table action -->
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Delete Confirmation Modal -->
+    <div id="delete-modal" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4">
+        <!-- Backdrop -->
+        <div id="delete-modal-backdrop" class="absolute inset-0 bg-slate-900/40 backdrop-blur-sm transition-opacity opacity-0"></div>
+        
+        <!-- Modal Content -->
+        <div id="delete-modal-content" class="bg-white w-full max-w-sm rounded-3xl p-6 relative z-10 shadow-2xl transform scale-95 opacity-0 transition-all duration-300 text-center">
+            
+            <div class="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <svg class="w-8 h-8 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+                </svg>
+            </div>
+
+            <h3 class="text-xl font-bold text-slate-800 mb-2">Hapus Data WhatsApp?</h3>
+            <p class="text-sm text-slate-500 mb-6 leading-relaxed">
+                Apakah Anda yakin ingin menghapus data milik <span id="delete-student-name" class="font-bold text-slate-800">Nama Siswi</span>?<br>
+                Statusnya akan diubah kembali menjadi <span class="text-slate-600 font-semibold">'Belum Mengisi'</span>.
+            </p>
+
+            <div class="flex gap-3">
+                <button id="btn-cancel-delete" class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold rounded-xl py-2.5 transition-colors active:scale-[0.98]">
+                    Batal
+                </button>
+                <button id="btn-confirm-delete" class="flex-1 bg-red-500 hover:bg-red-600 outline-none text-white font-semibold rounded-xl py-2.5 shadow-md transition-all active:scale-[0.98] flex justify-center items-center">
+                    Ya, Hapus
+                </button>
+            </div>
+            
+        </div>
+    </div>
+
+    <!-- Script that uses papaparse from CDN and Supabase -->
+    <script type="module" src="admin.js"></script>
+</body>
+</html>

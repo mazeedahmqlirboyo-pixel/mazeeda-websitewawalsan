@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pendataan WhatsApp Mazeeda</title>
+    <meta name="description" content="Pendataan Nomor WhatsApp Angkatan Mazeeda">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Outfit', 'sans-serif'],
+                    },
+                    colors: {
+                        primary: {
+                            50: '#f8fafc',
+                            100: '#f1f5f9',
+                            200: '#e2e8f0',
+                            300: '#cbd5e1',
+                            400: '#94a3b8',
+                            500: '#64748b',
+                            600: '#475569',
+                            700: '#334155',
+                            800: '#1e293b',
+                            900: '#0f172a',
+                        },
+                        secondary: {
+                            500: '#38bdf8', /* A subtle light blue for accents if needed */
+                            600: '#0284c7',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        /* Modern subtle patterns and animations */
+        body {
+            background-color: #f8fafc;
+            background-image: radial-gradient(#e2e8f0 1px, transparent 1px);
+            background-size: 20px 20px;
+        }
+
+        .slide-up {
+            animation: slideUp 0.3s ease-out forwards;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .fade-in {
+            animation: fadeIn 0.3s ease-out forwards;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
+        }
+
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        /* Loader */
+        .loader {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #8b5cf6;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+    </style>
+</head>
+
+<body class="text-slate-800 antialiased relative min-h-screen py-6 px-4 flex flex-col items-center">
+
+    <!-- Notification Container -->
+    <div id="toast-container"
+        class="fixed top-4 left-0 right-0 z-50 flex flex-col items-center pointer-events-none px-4 gap-2"></div>
+
+    <div class="w-full max-w-md flex flex-col gap-6 relative z-10">
+
+        <!-- Header Section -->
+        <header class="text-center slide-up" style="animation-delay: 0.1s;">
+            <div
+                class="w-20 h-20 mx-auto rounded-2xl flex items-center justify-center shadow-lg shadow-primary-500/30 mb-4 transform rotate-3 overflow-hidden bg-white border-2 border-primary-100">
+                <img src="logo.jpg" alt="Logo Mazeeda" class="w-full h-full object-cover transform -rotate-3"
+                    onerror="this.src='https://ui-avatars.com/api/?name=Mazeeda&background=8b5cf6&color=fff&size=200&rounded=false&bold=true';">
+            </div>
+            <h1
+                class="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary-700 to-secondary-600 mb-2">
+                Pendataan Nomor WhatsApp Wali Santri
+            </h1>
+            <p class="text-slate-500 font-medium">Angkatan Mazeeda</p>
+        </header>
+
+        <!-- Main Card -->
+        <main class="glass-panel shadow-xl shadow-slate-200/50 rounded-3xl p-6 slide-up" style="animation-delay: 0.2s;">
+
+            <!-- Class Selection -->
+            <div class="mb-6">
+                <label for="class-select" class="block text-sm font-semibold text-slate-700 mb-2">Pilih Bagian
+                    Kelas</label>
+                <div class="relative">
+                    <select id="class-select"
+                        class="w-full appearance-none bg-white border border-slate-200 text-slate-700 rounded-xl py-3 px-4 outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all font-medium cursor-pointer shadow-sm">
+                        <option value="" disabled selected>Pilih kelas...</option>
+                    </select>
+                    <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-slate-500">
+                        <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7">
+                            </path>
+                        </svg>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Loader Wrapper -->
+            <div id="loading-indicator" class="hidden flex-col items-center justify-center py-8">
+                <div class="loader mb-3"></div>
+                <p class="text-sm text-slate-500">Memuat data...</p>
+            </div>
+
+            <!-- Student List Section -->
+            <div id="student-list-container" class="hidden">
+                <h2 class="text-sm font-semibold text-slate-700 mb-3 flex justify-between items-center">
+                    <span>Daftar Siswi</span>
+                    <span id="student-count-badge"
+                        class="bg-primary-100 text-primary-700 py-0.5 px-2 rounded-full text-xs">0</span>
+                </h2>
+                <!-- Will be populated by JS -->
+                <div id="student-list" class="flex flex-col gap-2 max-h-80 overflow-y-auto pr-1 pb-2">
+                    <!-- Example Item
+                    <button class="w-full text-left bg-white border border-slate-100 p-4 rounded-xl shadow-sm hover:shadow-md hover:border-primary-200 transition-all active:scale-[0.98] group flex justify-between items-center">
+                        <span class="font-medium text-slate-700 group-hover:text-primary-600 transition-colors">Aisyah Putri</span>
+                        <svg class="w-5 h-5 text-slate-300 group-hover:text-primary-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+                    </button>
+                    -->
+                </div>
+
+                <div id="empty-state" class="hidden text-center py-8 text-slate-500">
+                    <svg class="w-12 h-12 mx-auto text-slate-300 mb-3" fill="none" stroke="currentColor"
+                        viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                            d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4">
+                        </path>
+                    </svg>
+                    <p class="text-sm">Tidak ada data untuk kelas ini.</p>
+                </div>
+            </div>
+
+        </main>
+
+        <!-- Footer / Contact Info -->
+        <footer class="mt-auto pt-10 pb-6 w-full slide-up" style="animation-delay: 0.3s;">
+            <!-- Socials & Contacts Block -->
+            <div class="bg-white/60 backdrop-blur-md rounded-2xl p-5 shadow-sm border border-slate-200/50 mb-4 max-w-sm mx-auto text-center">
+                <p class="text-xs font-bold text-slate-500 uppercase tracking-widest mb-4">Butuh Bantuan?</p>
+                
+                <div class="flex flex-col gap-3 items-center">
+                    <!-- Instagram -->
+                    <a href="https://www.instagram.com/mazeedahmqlirboyo/" target="_blank" rel="noopener" class="flex items-center gap-2 text-sm font-semibold text-slate-700 hover:text-pink-600 transition-colors w-full justify-center bg-white py-2 rounded-xl border border-slate-100 hover:border-pink-200 hover:shadow-sm">
+                        <svg class="w-5 h-5 text-pink-500" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg>
+                        @mazeedahmqlirboyo
+                    </a>
+                    
+                    <div class="flex gap-2 w-full">
+                        <!-- Admin Naja -->
+                        <a href="https://wa.me/6281217747025" target="_blank" rel="noopener" class="flex-1 flex flex-col items-center justify-center gap-1 text-[11px] sm:text-xs font-semibold text-slate-700 hover:text-green-600 transition-colors bg-white py-2 px-1 rounded-xl border border-slate-100 hover:border-green-200 hover:shadow-sm">
+                            <svg class="w-4 h-4 text-[#25D366]" fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51a12.8 12.8 0 0 0-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413Z"/></svg>
+                            Admin Naja
+                        </a>
+                        <!-- Admin Kharisma -->
+                        <a href="https://wa.me/6285235543513" target="_blank" rel="noopener" class="flex-1 flex flex-col items-center justify-center gap-1 text-[11px] sm:text-xs font-semibold text-slate-700 hover:text-green-600 transition-colors bg-white py-2 px-1 rounded-xl border border-slate-100 hover:border-green-200 hover:shadow-sm">
+                            <svg class="w-4 h-4 text-[#25D366]" fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51a12.8 12.8 0 0 0-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413Z"/></svg>
+                            Admin Kharisma
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Login Admin button -->
+            <div class="text-center mt-2">
+                <a href="admin.html"
+                    class="inline-flex items-center gap-1.5 text-[10px] font-medium text-slate-400 hover:text-slate-600 transition-colors px-3 py-1.5 rounded-full border border-transparent hover:border-slate-200">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z">
+                        </path>
+                    </svg>
+                    Area Admin
+                </a>
+            </div>
+        </footer>
+    </div>
+
+    <!-- Form Modal Overlay -->
+    <div id="form-modal" class="fixed inset-0 z-40 hidden flex items-end sm:items-center justify-center p-4 sm:p-0">
+        <!-- Backdrop -->
+        <div id="modal-backdrop" class="absolute inset-0 bg-slate-900/40 backdrop-blur-sm transition-opacity opacity-0">
+        </div>
+
+        <!-- Modal Content -->
+        <div id="modal-content"
+            class="bg-white w-full max-w-md rounded-3xl p-6 relative z-10 shadow-2xl transform translate-y-8 sm:translate-y-4 opacity-0 transition-all duration-300">
+            <button id="close-modal"
+                class="absolute top-4 right-4 text-slate-400 hover:text-slate-600 bg-slate-100 hover:bg-slate-200 p-2 rounded-full transition-colors">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12">
+                    </path>
+                </svg>
+            </button>
+
+            <h3 class="text-xl font-bold text-slate-800 mb-1">Isi Data WhatsApp</h3>
+            <p class="text-sm text-slate-500 mb-6">Untuk Wali Santri <span id="selected-student-name"
+                    class="font-semibold text-primary-600">Nama Siswi</span></p>
+
+            <form id="wa-form" class="space-y-4">
+                <input type="hidden" id="student-name-input">
+                <input type="hidden" id="student-class-input">
+
+                <div>
+                    <label for="wa-number" class="block text-sm font-semibold text-slate-700 mb-1.5">Nomor WhatsApp
+                        <span class="text-red-500">*</span></label>
+                    <div class="relative">
+                        <span
+                            class="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400 font-medium">+62</span>
+                        <input type="tel" id="wa-number" required minlength="9" placeholder="81234567890"
+                            class="w-full bg-slate-50 border border-slate-200 text-slate-800 rounded-xl py-3 pl-12 pr-4 outline-none focus:ring-2 focus:ring-primary-500 focus:bg-white transition-all">
+                    </div>
+                    <p class="text-xs text-slate-500 mt-1.5 text-right">Mulai tanpa angka 0 (Min. 10 digit)</p>
+                </div>
+
+                <div id="additional-wa-container" class="hidden slide-up">
+                    <label for="wa-number-alt" class="block text-sm font-semibold text-slate-700 mb-1.5">Nomor Tambahan
+                        <span class="text-slate-400 font-normal">(Opsional)</span></label>
+                    <div class="relative">
+                        <span
+                            class="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400 font-medium">+62</span>
+                        <input type="tel" id="wa-number-alt" placeholder="89876543210"
+                            class="w-full bg-slate-50 border border-slate-200 text-slate-800 rounded-xl py-3 pl-12 pr-4 outline-none focus:ring-2 focus:ring-primary-500 focus:bg-white transition-all">
+                    </div>
+                </div>
+
+                <button type="button" id="btn-add-wa"
+                    class="text-sm font-medium text-primary-600 hover:text-primary-700 flex items-center gap-1 group">
+                    <span
+                        class="bg-primary-50 text-primary-600 p-1 rounded-md group-hover:bg-primary-100 transition-colors">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4">
+                            </path>
+                        </svg>
+                    </span>
+                    Tambah Nomor
+                </button>
+
+                <div class="pt-4">
+                    <!-- Changed to type="button" to trigger modal instead of submitting immediately -->
+                    <button type="button" id="btn-pre-submit"
+                        class="w-full bg-primary-600 hover:bg-primary-700 text-white font-semibold rounded-xl py-3.5 px-4 shadow-lg shadow-primary-500/30 transition-all active:scale-[0.98] flex justify-center items-center gap-2">
+                        <span>Kirim Data</span>
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
+                        </svg>
+                    </button>
+                    <!-- Hidden actual submit button for validation -->
+                    <button type="submit" id="btn-actual-submit" class="hidden"></button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Confirmation Before Submit Form Modal Overlay -->
+    <div id="confirm-modal" class="fixed inset-0 z-[60] hidden flex items-center justify-center p-4">
+        <!-- Backdrop -->
+        <div id="confirm-modal-backdrop"
+            class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm transition-opacity opacity-0"></div>
+
+        <!-- Modal Content -->
+        <div id="confirm-modal-content"
+            class="bg-white w-full max-w-md rounded-3xl p-6 relative z-10 shadow-2xl transform scale-95 opacity-0 transition-all duration-300 text-center">
+
+            <div class="w-16 h-16 bg-yellow-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <svg class="w-8 h-8 text-yellow-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                </svg>
+            </div>
+
+            <h3 class="text-xl font-bold text-slate-800 mb-2">Peringatan Penting!</h3>
+            <p class="text-sm text-slate-600 mb-4 leading-relaxed">
+                Data yang sudah terkirim <strong>tidak bisa diubah kembali</strong> melalui halaman ini. Pastikan nomor
+                yang Anda masukkan sudah benar.
+            </p>
+
+            <div class="bg-slate-50 border border-slate-100 rounded-xl p-4 mb-6 text-left">
+                <p class="text-xs text-slate-500 mb-2 font-medium tracking-wide">Jika ada kesalahan setelah di kirim,
+                    hubungi:</p>
+                <div class="space-y-2">
+                    <a href="https://wa.me/6281217747025" target="_blank"
+                        class="flex items-center gap-2 text-sm font-semibold text-primary-600 hover:text-primary-700 transition-colors bg-white p-2 rounded-lg border border-slate-200">
+                        <svg class="w-4 h-4 text-[#25D366]" fill="currentColor" viewBox="0 0 24 24">
+                            <path
+                                d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51a12.8 12.8 0 0 0-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413Z" />
+                        </svg>
+                        Admin Naja
+                    </a>
+                    <a href="https://wa.me/6285235543513" target="_blank"
+                        class="flex items-center gap-2 text-sm font-semibold text-primary-600 hover:text-primary-700 transition-colors bg-white p-2 rounded-lg border border-slate-200">
+                        <svg class="w-4 h-4 text-[#25D366]" fill="currentColor" viewBox="0 0 24 24">
+                            <path
+                                d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51a12.8 12.8 0 0 0-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413Z" />
+                        </svg>
+                        Admin Kharisma
+                    </a>
+                </div>
+            </div>
+
+            <div class="flex gap-3 mt-4 flex-col-reverse sm:flex-row">
+                <button id="btn-cancel-confirm" type="button"
+                    class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold rounded-xl py-2.5 transition-colors active:scale-[0.98]">
+                    Kembali Edit
+                </button>
+                <button id="btn-final-submit" type="button"
+                    class="flex-1 bg-primary-600 hover:bg-primary-700 outline-none text-white font-semibold rounded-xl py-2.5 shadow-md transition-all active:scale-[0.98] flex justify-center items-center">
+                    Ya, Kirim Data
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Script loading -->
+    <script type="module" src="script.js"></script>
+
+</body>
+
+</html>
